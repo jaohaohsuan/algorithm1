@@ -14,7 +14,7 @@ namespace ClassLibrary1
 
     public class MapBuilder
     {
-        public static  IDictionary<string,Ball> Build(IEnumerable<Rule> rules)
+        public static IDictionary<string, Ball> Build(IEnumerable<Rule> rules)
         {
             var uniqStoreage = new ConcurrentDictionary<string, Ball>();
             foreach (var rule in rules)
@@ -25,10 +25,25 @@ namespace ClassLibrary1
                 uniqStoreage.TryAdd(rule.Two, new Ball(rule.Two));
                 two = uniqStoreage[rule.Two];
 
-                one.Balls.Add(two);
+                one.Add(two);
             }
 
             return uniqStoreage;
+        }
+    }
+
+    public class RulesGraph
+    {
+        private readonly IDictionary<string, Ball> _map;
+
+        public RulesGraph(IEnumerable<Rule> rules)
+        {
+            _map = MapBuilder.Build(rules);
+        }
+
+        public Ball this[string key]
+        {
+            get { return _map[key]; }
         }
     }
 
@@ -36,13 +51,33 @@ namespace ClassLibrary1
     {
         public Ball(string name)
         {
-            Balls = new List<Ball>();
+            Name = name;
+            _balls = new Dictionary<Ball, Ball>();
         }
 
-        public List<Ball> Balls { get; set; }
+        public bool Add(Ball other)
+        {
+            var notEqual = !ReferenceEquals(other, this);
+
+            if (notEqual && !_balls.ContainsKey(other))
+            {
+                _balls.Add(other, other);
+                return true;
+            }
+
+            return false;
+        }
+
+        public IEnumerable<Ball> Balls
+        {
+            get { return _balls.Values; }
+        }
+
         public string Name { get; private set; }
 
         private int? _level;
+        private readonly Dictionary<Ball, Ball> _balls;
+
         public int Level
         {
             get
@@ -58,5 +93,29 @@ namespace ClassLibrary1
                 return _level.Value;
             }
         }
+    }
+
+    public class ValidNeighbors
+    {
+        private readonly bool _result;
+
+        public ValidNeighbors(RulesGraph rules, LinkedListNode<string> node)
+        {
+            try
+            {
+                var ball = rules[node.Value];
+                _result = ball.Balls.First(o => o.Name == node.Next.Value) != null;
+            }
+            catch (KeyNotFoundException)
+            {
+                _result = true;
+            }
+            catch (Exception)
+            {
+                _result = false;
+            }
+        }
+
+        public bool Result { get { return _result; } }
     }
 }
