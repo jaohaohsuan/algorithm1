@@ -104,9 +104,17 @@ namespace ClassLibrary1
             try
             {
                 var ball = rules[node.Value];
-                _result = ball.Balls.First(o => o.Name == node.Next.Value) != null;
+
+                if (!ball.Balls.Any())
+                    _result = true;
+                else
+                    _result = ball.Balls.FirstOrDefault(o => o.Name == node.Next.Value) != null;
             }
             catch (KeyNotFoundException)
+            {
+                _result = true;
+            }
+            catch (NullReferenceException)
             {
                 _result = true;
             }

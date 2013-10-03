@@ -48,9 +48,36 @@ namespace ClassLibrary1.Tests
             Assert.IsTrue(new ValidNeighbors(rulesGraph, new LinkedList<string>(new[] { "A", "C" }).First).Result);
             Assert.IsTrue(new ValidNeighbors(rulesGraph, new LinkedList<string>(new[] { "D", "A" }).First).Result);
 
-            Assert.IsFalse(new ValidNeighbors(rulesGraph, new LinkedList<string>(new[] { "C", "A" }).First).Result);
-            Assert.IsFalse(new ValidNeighbors(rulesGraph, new LinkedList<string>(new[] { "A" }).First).Result);
+            Assert.IsTrue(new ValidNeighbors(rulesGraph, new LinkedList<string>(new[] { "C", "A" }).First).Result);
+
+            Assert.IsTrue(new ValidNeighbors(rulesGraph, new LinkedList<string>(new[] { "A" }).First).Result);
+            Assert.IsTrue(new ValidNeighbors(rulesGraph, new LinkedList<string>(new[] { "B" }).First).Result);
+
             Assert.IsFalse(new ValidNeighbors(rulesGraph, new LinkedList<string>(new[] { "A", "D" }).First).Result);
+        }
+
+        [Test]
+        public void BuildScriptTest()
+        {
+            var sources = new LinkedList<string>(new[] { "A", "C", "C", "D", string.Empty, "B", "A", "E", "C" });
+
+            var rules = new[]
+                {
+                    new Rule { One = "A", Two = "B" },
+                    new Rule { One = "A", Two = "C" },
+                };
+
+            var rulesGraph = new RulesGraph(rules);
+
+            LinkedListNode<string> cursor = sources.Last;
+
+            while (cursor.Previous != null)
+            {
+                var validNeighbors = new ValidNeighbors(rulesGraph, cursor.Previous);
+                
+
+                cursor = cursor.Previous;
+            }
         }
     }
 }
